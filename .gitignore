@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.env
+.venv/
+venv/
+ENV/
+env/
+*.env
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+local_settings.py
+
+# CSV files you mentioned
+menu_items.csv
+restaurants.csv
+
+# Coverage and testing
+.coverage
+.tox/
+.nox/
+.cache/
+pytest_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
