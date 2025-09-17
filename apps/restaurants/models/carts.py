@@ -1,6 +1,7 @@
 from django.db import models
 from apps import userprofile, restaurants
 from coresite.mixin import AbstractTimeStampModel
+from django.db.models import F, Sum, DecimalField
 
 
 class Cart(AbstractTimeStampModel):
@@ -13,6 +14,22 @@ class Cart(AbstractTimeStampModel):
 
     def __str__(self):
         return f"Cart for {self.user.first_name} {self.user.last_name}"
+
+    def update_total_price(self):
+        total = (
+            self.cart_items.annotate(
+                subtotal=F("quantity") * F("price")
+            )
+            .aggregate(
+                total=Sum(
+                    "subtotal",
+                    output_field=DecimalField(max_digits=10, decimal_places=2)
+                )
+            )
+            .get("total")
+        )
+        self.total_price = total or 0
+        self.save()
 
 
 class CartItem(AbstractTimeStampModel):
@@ -27,3 +44,6 @@ class CartItem(AbstractTimeStampModel):
 
     def __str__(self):
         return f"{self.quantity} x {self.menu_item.name} in {self.cart}"
+
+    class Meta:
+        unique_together = ("cart", "menu_item")

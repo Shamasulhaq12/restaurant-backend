@@ -37,15 +37,34 @@ class CartItemCreateAPIView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         try:
-            menu_item = request.data.get('menu_item')
-            quantity = request.data.get('quantity')
-            restaurant = request.data.get('restaurant')
-            cart, _ = Cart.objects.get_or_create(user=request.user.profile)
-            menu_item = get_object_or_404(MenuItem, id=menu_item)
+            menu_item_id = request.data.get('menu_item')
+            comments = request.data.get('comments')
+            quantity = int(request.data.get('quantity', 1))
 
-            if not menu_item:
-                return Response({"message": "This product is not available."},)
-            return Response(CartItemSerializer(menu_item).data)
+            menu_item = get_object_or_404(MenuItem, id=menu_item_id)
+            cart, _ = Cart.objects.get_or_create(user=request.user.profile)
+
+            cart_item, created = CartItem.objects.get_or_create(
+                cart=cart,
+                menu_item=menu_item,
+                defaults={
+                    "quantity": quantity,
+                    "comments": comments,
+                    "price": menu_item.price,
+                },
+            )
+
+            if not created:
+                cart_item.quantity += quantity
+                if comments:
+                    cart_item.comments = comments
+                cart_item.save()
+
+            cart.update_total_price()
+            cart.save()
+
+            return Response(CartItemSerializer(cart_item).data, status=status.HTTP_201_CREATED)
+
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -57,21 +76,15 @@ class UpdateCartItemAPIView(UpdateAPIView):
     def update(self, request, *args, **kwargs):
         try:
             cart_item = self.get_object()
-            quantity = request.data.get('quantity')
-            menu_item = cart_item.menu_item
-            if menu_item:
-                cart = get_object_or_404(Cart, items=cart_item)
-                cart.total_price -= cart_item.size.price * cart_item.quantity
-                cart_item.quantity = quantity
-                cart_item.save()
-                cart.total_price += cart_item.size.price * quantity
-                menu_item.save()
-                cart.save()
-                return Response(CartSerializer(cart).data)
-            else:
-                return Response({
-                    "message": f"{menu_item.name} not available."
-                }, status=status.HTTP_400_BAD_REQUEST)
+            quantity = int(request.data.get('quantity', cart_item.quantity))
+
+            cart_item.quantity = quantity
+            cart_item.save()
+
+            cart = cart_item.cart
+            cart.update_total_price()
+
+            return Response(CartSerializer(cart).data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -83,8 +96,8 @@ class DeleteCartItemAPIView(DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         try:
             cart_item = self.get_object()
-            cart = get_object_or_404(Cart, items=cart_item)
-            cart.total_price -= cart_item.size.price * cart_item.quantity
+            cart = get_object_or_404(Cart, cart_items=cart_item)
+            cart.total_price -= cart_item.price * cart_item.quantity
             cart.save()
             cart_item.menu_item.save()
             cart_item.delete()
