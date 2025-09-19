@@ -76,6 +76,8 @@ class UpdateCartItemAPIView(UpdateAPIView):
     def update(self, request, *args, **kwargs):
         try:
             cart_item = self.get_object()
+            comments = request.data.get('comments', cart_item.comments)
+            cart_item.comments = comments
             quantity = int(request.data.get('quantity', cart_item.quantity))
 
             cart_item.quantity = quantity
@@ -104,27 +106,3 @@ class DeleteCartItemAPIView(DestroyAPIView):
             return Response(CartSerializer(cart).data)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class CartItemViewSet(ModelViewSet):
-#     queryset = CartItem.objects.all()
-#     serializer_class = CartItemSerializer
-#
-#     def perform_create(self, serializer):
-#         # Custom logic on create
-#         cart_item = serializer.save()
-#         cart = cart_item.cart
-#         cart.total_price = sum(item.price * item.quantity for item in cart.cart_items.all())
-#         cart.save()
-#
-#     def perform_update(self, serializer):
-#         cart_item = serializer.save()
-#         cart = cart_item.cart
-#         cart.total_price = sum(item.price * item.quantity for item in cart.cart_items.all())
-#         cart.save()
-#
-#     def perform_destroy(self, instance):
-#         cart = instance.cart
-#         instance.delete()
-#         cart.total_price = sum(item.price * item.quantity for item in cart.cart_items.all())
-#         cart.save()

@@ -10,6 +10,14 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = "__all__"
 
+class OrderDetailSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Orders
+        fields = "__all__"
+
+
 class OrderSerializer(serializers.ModelSerializer):
     """
     Serializer for Order model.

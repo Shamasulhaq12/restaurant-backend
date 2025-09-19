@@ -14,6 +14,8 @@ from apps.restaurants.views import (
     RetrieveCartAPIView,
     DeleteCartItemAPIView,
     UpdateCartItemAPIView,
+    ReviewViewSet,
+    OrderCheckoutAPIView, UserOrderHistoryAPIView, WaiterOrderListAPIView,
 )
 from apps.restaurants.views.ai import (
     RestaurantTopSuggestionsView,
@@ -23,6 +25,7 @@ from apps.restaurants.views.ai import (
 
 router = DefaultRouter()
 router.register(r'tables', TableViewSet, basename='table')
+router.register(r'reviews', ReviewViewSet, basename='reviews')
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -41,7 +44,7 @@ urlpatterns = [
          MenuItemDetailView.as_view(), name='menu-item-detail'),
 
     # QR code scanning endpoint
-    path("scan-qr/", QRScanView.as_view(), name="scan-qr"),
+    path("tables/scan-qr/", QRScanView.as_view(), name="scan-qr"),
 
     # AI suggestions endpoints
     path('ai/restaurants/suggestions/top/', RestaurantTopSuggestionsView.as_view(),
@@ -50,12 +53,16 @@ urlpatterns = [
          RestaurantMenuSuggestionsView.as_view(), name='restaurant-menu-suggestions'),
 
     # Cart and CartItem endpoints
-    path('create-cart/', CreateCartAPIView.as_view(), name='create-cart'),
-    path('create-cart-item/', CartItemCreateAPIView.as_view(),
+    path('cart/create-cart/', CreateCartAPIView.as_view(), name='create-cart'),
+    path('cart/create-cart-item/', CartItemCreateAPIView.as_view(),
          name='create-cart-item'),
-    path('retrieve-cart/', RetrieveCartAPIView.as_view(), name='retrieve-cart'),
-    path('delete-cart-item/<int:pk>/', DeleteCartItemAPIView.as_view(),
+    path('cart/retrieve-cart/', RetrieveCartAPIView.as_view(), name='retrieve-cart'),
+    path('cart/delete-cart-item/<int:pk>/', DeleteCartItemAPIView.as_view(),
          name='delete-cart-item'),
-    path('update-cart-item/<int:pk>/', UpdateCartItemAPIView.as_view(),
+    path('cart/update-cart-item/<int:pk>/', UpdateCartItemAPIView.as_view(),
          name='update-cart-item'),
+
+    path('orders/checkout-order/', OrderCheckoutAPIView.as_view(), name='checkout-order'),
+    path('orders/', UserOrderHistoryAPIView.as_view(), name='user-order-history'),
+    path('orders/waiter/', WaiterOrderListAPIView.as_view(), name='waiter-order-list')
 ]

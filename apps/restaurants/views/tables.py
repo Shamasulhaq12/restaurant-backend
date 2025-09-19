@@ -17,14 +17,9 @@ class QRScanView(generics.GenericAPIView):
     Handles customer scanning QR codes for a restaurant table.
     """
     permission_classes = [AllowAny]
-
     serializer_class = TableSerializer
 
     def get(self, request, *args, **kwargs):
-
-        print("DEBUG USER:", request.user, request.user.is_authenticated)
-        print("DEBUG AUTH:", request.auth)
-
         restaurant_id = request.query_params.get("restaurant")
         table_number = request.query_params.get("table")
 

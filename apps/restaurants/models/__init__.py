@@ -5,3 +5,4 @@ from .payments import *
 from .menus import *
 from .tables import *
 from .category import *
+from .reviews import *

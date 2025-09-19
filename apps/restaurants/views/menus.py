@@ -9,28 +9,23 @@ class RestaurantListView(ListAPIView):
     View to list all restaurants.
     """
     permission_classes = [AllowAny]
-
     serializer_class = RestaurantSerializer
     queryset = RestaurantSerializer.Meta.model.objects.all()
-
 
 class RestaurantDetailView(RetrieveAPIView):
     """
     View to retrieve a single restaurant by its ID.
     """
     permission_classes = [AllowAny]
-
     serializer_class = RestaurantSerializer
     queryset = RestaurantSerializer.Meta.model.objects.all()
     lookup_field = 'id'
-
 
 class MenuListView(ListAPIView):
     """
     View to list all menus for a specific restaurant.
     """
     permission_classes = [AllowAny]
-
     serializer_class = MenuSerializer
 
     def get_queryset(self):
@@ -40,24 +35,20 @@ class MenuListView(ListAPIView):
         restaurant_id = self.kwargs.get('restaurant_id')
         return MenuSerializer.Meta.model.objects.filter(restaurant_id=restaurant_id)
 
-
 class MenuDetailView(RetrieveAPIView):
     """
     View to retrieve a single menu by its ID.
     """
     permission_classes = [AllowAny]
-
     serializer_class = MenuSerializer
     queryset = MenuSerializer.Meta.model.objects.all()
     lookup_field = 'id'
-
 
 class MenuItemListView(ListAPIView):
     """
     View to list all menu items for a specific menu.
     """
     permission_classes = [AllowAny]
-
     serializer_class = MenuSerializer
 
     def get_queryset(self):
@@ -67,15 +58,11 @@ class MenuItemListView(ListAPIView):
         menu_id = self.kwargs.get('menu_id')
         return MenuSerializer.Meta.model.objects.filter(id=menu_id).prefetch_related('menu_items')
 
-
 class MenuItemDetailView(RetrieveAPIView):
     """
     View to retrieve a single menu item by its ID.
     """
     permission_classes = [AllowAny]
-
     serializer_class = MenuSerializer
     queryset = MenuSerializer.Meta.model.objects.all()
     lookup_field = 'id'
-
-

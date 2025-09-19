@@ -1,5 +1,16 @@
 from django.contrib import admin
-from .models import Restaurant, RestaurantImage, Menu, MenuItem, MenuItemIngredient, Category
+
+from .models import (
+    Restaurant,
+    RestaurantImage,
+    Menu,
+    MenuItem,
+    MenuItemIngredient,
+    Category,
+    Orders,
+    OrderItem,
+    Review
+)
 
 
 @admin.register(Restaurant)
@@ -40,3 +51,23 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
     ordering = ('name',)
+
+@admin.register(Orders)
+class OrdersAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'order_type', 'order_status', 'created_at')
+    search_fields = ('user__first_name', 'user__last_name', 'billing_email', 'billing_phone')
+    list_filter = ('order_type', 'order_status', 'created_at')
+    ordering = ('-created_at',)
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ('menu_item', 'quantity', 'price')
+    search_fields = ('menu_item__name',)
+    ordering = ('menu_item',)
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('user', 'order', 'rate', 'created_at')
+    search_fields = ('user__first_name', 'user__last_name', 'order__user__user_type')
+    list_filter = ('rate', 'created_at')
+    ordering = ('-created_at',)

@@ -5,7 +5,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from apps.restaurants.ai.utils import top_restaurant_ids, load_restaurant_ratings
-from apps.restaurants.models import Restaurant, MenuItem
 from apps.restaurants.serializers import RestaurantSerializer, MenuItemSerializer
 
 
