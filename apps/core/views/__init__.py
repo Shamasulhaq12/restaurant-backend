@@ -7,3 +7,4 @@ from .reset_password import ResetPasswordAPIView
 from .accountstatus import AccountStatusAPIView
 from .accountactivation import AccountActivationAPIView
 from .resend_activation import ResendActivationAPIView
+from .login import *

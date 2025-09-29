@@ -9,9 +9,10 @@ from apps.core.views import (
     AccountStatusAPIView,
     AccountActivationAPIView,
     ResendActivationAPIView,
+    CustomTokenObtainPairView,
 )
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
+    # TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
 )
@@ -21,7 +22,7 @@ urlpatterns = [
     path('account-activation/<secret_key>', AccountActivationAPIView.as_view(),
          name='account-activation'),
     path('resend-activation/', ResendActivationAPIView.as_view(), name='resend-activation'),
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('me/', UserDetailView.as_view(), name='user'),
     path('forget-password/', ForgetPasswordView.as_view(), name='forget_password'),
     path('token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),

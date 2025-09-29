@@ -5,8 +5,6 @@ from apps.restaurants.views import (
     MenuDetailView,
     MenuItemListView,
     MenuItemDetailView,
-    RestaurantListView,
-    RestaurantDetailView,
     TableViewSet,
     QRScanView,
     CreateCartAPIView,
@@ -15,7 +13,10 @@ from apps.restaurants.views import (
     DeleteCartItemAPIView,
     UpdateCartItemAPIView,
     ReviewViewSet,
-    OrderCheckoutAPIView, UserOrderHistoryAPIView, WaiterOrderListAPIView,
+    OrderCheckoutAPIView,
+    UserOrderHistoryAPIView,
+    WaiterOrderListAPIView,
+    RestaurantViewSet,
 )
 from apps.restaurants.views.ai import (
     RestaurantTopSuggestionsView,
@@ -26,14 +27,22 @@ from apps.restaurants.views.ai import (
 router = DefaultRouter()
 router.register(r'tables', TableViewSet, basename='table')
 router.register(r'reviews', ReviewViewSet, basename='reviews')
+router.register(r'restaurants', RestaurantViewSet, basename='restaurant')
 
 urlpatterns = [
     path('', include(router.urls)),
 
     # Existing resources
-    path('restaurants/', RestaurantListView.as_view(), name='restaurant-list'),
-    path('restaurants/<int:id>/', RestaurantDetailView.as_view(),
-         name='restaurant-detail'),
+    # path('restaurants/', RestaurantListView.as_view(), name='restaurant-list'),
+    # path('restaurants/<int:id>/', RestaurantDetailView.as_view(),
+    #      name='restaurant-detail'),
+    # path('restaurants/create/', RestaurantCreateView.as_view(),
+    #      name='restaurant-create'),
+    # path("restaurants/<int:restaurant_id>/upload-image/",
+    #      RestaurantImageUploadView.as_view(),
+    #      name="restaurant-image-upload"),
+
+
     path('restaurants/<int:restaurant_id>/menus/', MenuListView.as_view(),
          name='menu-list'),
     path('restaurants/<int:restaurant_id>/menus/<int:id>/',

@@ -12,6 +12,7 @@ CUSTOM_APPLICATIONS = [
     'apps.core',
     'apps.userprofile',
     "apps.restaurants",
+    "apps.super_admin",
 
 ]
 

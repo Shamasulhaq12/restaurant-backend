@@ -1,4 +1,6 @@
 from django.db import models
+
+from apps import restaurants
 from coresite.mixin import AbstractTimeStampModel
 from django.contrib.auth.models import (
     BaseUserManager,
@@ -19,9 +21,8 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             username=username,
             user_type=user_type,
-
-
         )
+
         user.is_staff = True
         user.set_password(password)
         user.save()
@@ -37,8 +38,8 @@ class UserManager(BaseUserManager):
             password=password,
             username=username,
             user_type=user_type,
-
         )
+
         user.is_admin = True
         user.is_staff = True
         user.is_active = True
@@ -50,11 +51,11 @@ class UserManager(BaseUserManager):
 
 USER_TYPE_CHOICES = (
     ('user', 'User'),
+    ('waiter', 'Waiter'),
+    ('restaurant_owner', 'Restaurant Owner'),
     ('admin', 'Admin'),
     ('super_admin', 'Super Admin'),
-
 )
-
 
 class User(AbstractBaseUser, AbstractTimeStampModel):
     """
