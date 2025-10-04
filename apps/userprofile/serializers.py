@@ -13,47 +13,57 @@ class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
     user_type = serializers.CharField(source='user.user_type', read_only=True)
-    restaurants = serializers.SerializerMethodField()
+    image = serializers.ImageField(read_only=True, required=False)
+    restaurant = serializers.SerializerMethodField()
+    owned_restaurants = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
         fields = '__all__'
         read_only_fields = ('user', 'created_at', 'updated_at')
 
-    def get_restaurants(self, obj):
-        user = obj.user
-        if user.user_type == 'restaurant_owner':
-            return RestaurantSerializer(user.owned_restaurants.all(), many=True).data
-        elif user.user_type == 'waiter' and hasattr(user, 'waiter'):
-            return RestaurantSerializer(user.waiter.restaurant).data
+    def get_restaurant(self, obj):
+        if obj.user.user_type == 'waiter' and obj.restaurant:
+            return RestaurantSerializer(obj.restaurant).data
+        return None
+
+    def get_owned_restaurants(self, obj):
+        if obj.user.user_type == 'restaurant_owner':
+            return RestaurantSerializer(obj.owned_restaurants.all(), many=True).data
         return []
 
 class UserProfileWriteSerializer(serializers.ModelSerializer):
-    # Include user fields for creation/update
     email = serializers.EmailField(source="user.email")
     username = serializers.CharField(source="user.username")
     password = serializers.CharField(source="user.password", write_only=True, required=False)
     user_type = serializers.ChoiceField(source="user.user_type", choices=User._meta.get_field("user_type").choices)
-    restaurants = serializers.SerializerMethodField()
+    image = serializers.ImageField(write_only=True, required=False)
+
+    restaurant = serializers.PrimaryKeyRelatedField(
+        queryset=Restaurant.objects.all(),
+        required=False,
+        allow_null=True
+    )
+    owned_restaurants = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Restaurant.objects.all(),
+        required=False
+    )
 
     class Meta:
         model = UserProfile
         fields = [
             "id", "first_name", "last_name", "phone", "bio", "image",
-            "email", "username", "password", "user_type", 'restaurants',
+            "email", "username", "password", "user_type",
+            'restaurant', 'owned_restaurants',
         ]
-
-    def get_restaurants(self, obj):
-        user = obj.user
-        if user.user_type == 'restaurant_owner':
-            return RestaurantSerializer(user.owned_restaurants.all(), many=True).data
-        elif user.user_type == 'waiter' and hasattr(user, 'waiter'):
-            return RestaurantSerializer(user.waiter.restaurant).data
-        return []
 
     def create(self, validated_data):
         user_data = validated_data.pop("user")
         password = user_data.pop("password", None)
+        owned_restaurants = validated_data.pop('owned_restaurants', [])
+        restaurant = validated_data.pop('restaurant', None)
+        image = validated_data.pop('image', None)
 
         # Create user
         try:
@@ -61,15 +71,27 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
                 user = User.objects.create(**user_data)
                 if password:
                     user.set_password(password)
-                    user.save()
-
                 user.is_active = True
-                if user in ['waiter', 'restaurant_owner'] :
+                if user.user_type in ['waiter', 'restaurant_owner'] :
                     user.is_staff = True
-
                 user.save()
-                # Create profile
+
                 profile = UserProfile.objects.create(user=user, **validated_data)
+
+                if user.user_type == 'waiter' and restaurant:
+                    profile.restaurant = restaurant
+                    profile.owned_restaurants.clear()
+                elif user.user_type == 'restaurant_owner':
+                    profile.owned_restaurants.set(owned_restaurants or [])
+                    profile.restaurant = None
+                else:
+                    profile.restaurant = None
+                    profile.owned_restaurants.clear()
+
+                if image:
+                    profile.image = image
+
+                profile.save()
                 return profile
 
         except IntegrityError as e:
@@ -79,11 +101,12 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"username": "A user with that username already exists."})
             raise serializers.ValidationError({"error": str(e)})
 
-
-
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user", {})
         password = user_data.pop("password", None)
+        owned_restaurants = validated_data.pop("owned_restaurants", None)
+        restaurant = validated_data.pop("restaurant", None)
+        image = validated_data.pop("image", None)
 
         # Update User fields
         for attr, value in user_data.items():
@@ -95,6 +118,20 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
         # Update Profile fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        instance.save()
 
+        # Update restaurant for waiter
+        if instance.user.user_type == 'waiter' and restaurant:
+            instance.restaurant = restaurant
+            instance.owned_restaurants.clear()
+        elif instance.user.user_type == 'restaurant_owner':
+            instance.owned_restaurants.set(owned_restaurants or [])
+            instance.restaurant = None
+        else:
+            instance.restaurant = None
+            instance.owned_restaurants.clear()
+
+        if image:
+            instance.image = image
+
+        instance.save()
         return instance

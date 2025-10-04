@@ -1,6 +1,6 @@
 from django.db import models
 
-from apps import restaurants, core
+from apps import restaurants, userprofile
 from coresite.mixin import AbstractTimeStampModel
 
 
@@ -9,9 +9,8 @@ class Restaurant(AbstractTimeStampModel):
     Model representing a restaurant.
     """
     owners = models.ManyToManyField(
-        'core.User',
+        'userprofile.UserProfile',
         related_name='owned_restaurants',
-        limit_choices_to={'user_type': 'restaurant_owner'},
         blank=True
     )
 
@@ -35,7 +34,3 @@ class RestaurantImage(AbstractTimeStampModel):
 
     def __str__(self):
         return f"Image for {self.restaurant.name}"
-
-class Waiter(AbstractTimeStampModel):
-    user = models.OneToOneField('core.User', on_delete=models.CASCADE, related_name='waiter')
-    restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, related_name='waiters')

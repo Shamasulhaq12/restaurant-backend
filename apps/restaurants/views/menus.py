@@ -63,6 +63,7 @@ class RestaurantViewSet(ModelViewSet):
             qs = qs[:10]  # default also capped at 10
 
         data = [{"id": r.id, "name": r.name} for r in qs]
+        # serializer = RestaurantSerializer(qs, many=True)
         return Response(data)
 
 class MenuListView(ListAPIView):

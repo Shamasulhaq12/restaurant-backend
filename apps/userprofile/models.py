@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps import restaurants
 from apps.core.models import User
 from coresite.mixin import AbstractTimeStampModel
 
@@ -12,6 +13,12 @@ class UserProfile(AbstractTimeStampModel):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     image = models.ImageField(upload_to='images', blank=True, null=True)
+    restaurant = models.ForeignKey(
+        'restaurants.Restaurant',
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='waiters',
+    )
 
     def __str__(self):
         return self.first_name+' '+self.last_name

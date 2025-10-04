@@ -1,8 +1,19 @@
 from rest_framework import serializers
 
-from apps.core.models import User
 from apps.restaurants.models import Menu, MenuItem, MenuItemIngredient, RestaurantImage, Restaurant
+from apps.userprofile.models import UserProfile
 
+
+class UserProfileUserNameSerializer(serializers.ModelSerializer):
+    """
+    Serializer for UserProfile model with only username field.
+    """
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'username']
+        read_only_fields = ['id', 'username']
 
 class RestaurantImageSerializer(serializers.ModelSerializer):
     """
@@ -16,11 +27,8 @@ class RestaurantImageSerializer(serializers.ModelSerializer):
 class RestaurantSerializer(serializers.ModelSerializer):
     images = RestaurantImageSerializer(many=True, read_only=True)
     image = serializers.ImageField(write_only=True, required=False)  # 👈 new
-    owners = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=User.objects.filter(user_type='restaurant_owner'),
-        required=False
-    )
+    owners = UserProfileUserNameSerializer(many=True, read_only=True)
+    waiters = UserProfileUserNameSerializer(many=True, read_only=True)
 
     class Meta:
         model = Restaurant
@@ -34,6 +42,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'images',
             'image',
             'owners',
+            'waiters',
         ]
         read_only_fields = ['id', 'images']
 

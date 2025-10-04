@@ -9,7 +9,7 @@ from .models import (
     Category,
     Orders,
     OrderItem,
-    Review
+    Review,
 )
 
 
